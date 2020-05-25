@@ -1,0 +1,200 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define MX_HEIGHT 100
+
+struct HTree {
+	char data;
+	int freq;
+	struct HTree *left, *right;
+};
+
+typedef struct HTree HTree;
+
+struct MinHeap {
+	int size;
+	int capacity;
+	HTree** Array;
+};
+
+typedef struct MinHeap MinHeap;
+
+HTree* newNode(char data, unsigned freq)
+{
+	HTree* temp  = new HTree;//(HTree*)malloc (sizeof(HTree));
+
+	temp->left = temp->right = NULL;
+	temp->data = data;
+	temp->freq = freq;
+
+	return temp;
+}
+
+MinHeap* createMinHeap(int capacity)
+
+{
+
+	MinHeap* minHeap = new MinHeap;//(MinHeap*)malloc(sizeof(MinHeap));
+	minHeap->size = 0; //0 -> Initially
+	minHeap->capacity = capacity; //Initial capacity
+	minHeap->Array = new HTree*[minHeap-> capacity];//(HTree**)malloc(minHeap-> capacity * sizeof(HTree*)); //8888888888888888888
+
+	return minHeap;
+}
+
+void swapHTree(HTree** a, HTree** b)
+{
+	HTree* t = *a;
+	*a = *b;
+	*b = t;
+}
+
+void minHeapify(struct MinHeap* minHeap, int idx)
+{
+	int smallest = idx;
+	int left = 2 * idx + 1;
+	int right = 2 * idx + 2;
+	if (left < minHeap->size && minHeap->Array[left]-> freq < minHeap->Array[smallest]->freq)
+		smallest = left;
+	if (right < minHeap->size && minHeap->Array[right]-> freq < minHeap->Array[smallest]->freq)
+		smallest = right;
+	if (smallest != idx) {
+		swapHTree(&minHeap->Array[smallest], &minHeap->Array[idx]);
+		minHeapify(minHeap, smallest);
+	}
+}
+
+int isSizeOne(struct MinHeap* minHeap)
+{
+	return (minHeap->size == 1);
+}
+
+HTree* extractMin(struct MinHeap* minHeap)
+{
+	HTree* temp = minHeap->Array[0];
+	minHeap->Array[0] = minHeap->Array[minHeap->size - 1];
+	minHeap->size=minHeap->size-1;
+	minHeapify(minHeap, 0);
+	return temp;
+}
+
+void insertMinHeap(struct MinHeap* minHeap, HTree* HTree)
+{
+	minHeap->size=minHeap->size+1;
+	int i = minHeap->size - 1;
+	while (i && HTree->freq < minHeap->Array[(i - 1) / 2]->freq) {
+		minHeap->Array[i] = minHeap->Array[(i - 1) / 2];
+		i = (i - 1) / 2;
+	}
+	minHeap->Array[i] = HTree;
+}
+
+void buildMinHeap(struct MinHeap* minHeap)
+{
+	int n = minHeap->size - 1;
+	int i;
+	for (i = (n - 1) / 2; i >= 0; i--) minHeapify(minHeap, i);
+}
+
+void printArr(int arr[], int n)
+{
+	int i;
+	for (i = 0; i < n; ++i) cout<< arr[i];
+	cout<<"\n";
+}
+
+int isLeaf(HTree* root)
+{
+	return !(root->left) && !(root->right);
+}
+
+MinHeap* createAndBuildMinHeap(char a[], int f[], int n)
+{
+	MinHeap* minHeap = createMinHeap(n);
+
+	for (int i = 0; i < n; ++i) minHeap->Array[i] = newNode(a[i], f[i]);
+
+	minHeap->size = n;
+	buildMinHeap(minHeap);
+
+	return minHeap;
+}
+
+
+HTree* buildHT(char a[], int f[], int n)
+{
+	HTree *left, *right, *top;
+	struct MinHeap* minHeap = createAndBuildMinHeap(a, f, n);
+	while (!isSizeOne(minHeap)) {
+		left = extractMin(minHeap);
+		right = extractMin(minHeap);
+
+		top = newNode('*', left->freq + right->freq);//* is a dummy symbol
+
+		top->left = left;
+		top->right = right;
+
+		insertMinHeap(minHeap, top);
+	}
+	return extractMin(minHeap);
+}
+
+//Recursive function to generate Huffman Codes for each character
+void codes(HTree* root, int arr[], int top)
+{
+	if(root->left){
+		arr[top] = 0;
+		codes(root->left, arr, top + 1);
+	}
+	if(root->right){
+		arr[top] = 1;
+		codes(root->right, arr, top + 1);
+	}
+	if(isLeaf(root)){
+		cout<< root->data <<" = ";
+		printArr(arr, top);
+	}
+}
+
+void printHC(char a[], int f[], int n)
+{
+	HTree* root = buildHT(a, f, n);
+	int arr[MX_HEIGHT], top = 0;
+	codes(root, arr, top);
+}
+
+int power(int x, int y)
+{
+    int res = 1;
+    while (y > 0)
+    {
+        if (y & 1)
+            res = res*x;
+        y = y>>1;
+        x = x*x;
+    }
+    return res;
+}
+
+void solve(int t)
+{
+    int n = power(10,t+2);
+    char a[10]={'a','b','c','d','e','f','g','h','i','j'};
+    int f[10]={};
+    for(int i=0;i<n;i++){
+        int r_val = rand()%10;
+        f[r_val]++;
+    }
+    cout<<"Frequencies of each character : TEST CASE "<<t+1<<endl;
+    for(int i=0;i<10;i++){
+        cout<<a[i]<<" "<<f[i]<<endl;
+    }
+    cout<<"HUFFMAN ENCODING"<<endl;
+    printHC(a,f,10);
+}
+
+int main()
+{
+    int t = 0;
+    while(t<3) solve(t),t++;
+}

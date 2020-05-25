@@ -1,0 +1,59 @@
+#include<bits/stdc++.h>
+#define REP(i,n) for (int i = 1; i <= n; i++)
+#define mod 100000000
+#define pb push_back
+#define ff first
+#define ss second
+#define ii pair<int,int>
+#define vi vector<int>
+#define vii vector<ii>
+#define lli long long int
+#define INF 1000000000
+#define endl '\n'
+const double PI = 3.141592653589793238460;
+typedef std::complex<double> Complex;
+typedef std::valarray<Complex> CArray;
+
+using namespace std;
+
+int limit_f , limit_h;
+lli dp[101][101][11][11];
+
+int getAns(int f ,int h , int k1 , int k2)
+{
+
+	if(k1>limit_f || k2>limit_h) return 0;
+
+	if(f<0 || h<0) return 0;
+
+	if((f + h) == 0) return 1;
+
+	if(dp[f][h][k1][k2] != -1)	return dp[f][h][k1][k2];
+
+	//fill f
+	int x = 0;
+    x = getAns(f - 1, h , k1 + 1 , 0);
+
+	//fill h
+	int y = 0;
+    y = getAns(f , h - 1 , 0 , k2 + 1);
+
+	return dp[f][h][k1][k2] = (x + y) % mod;
+}
+
+int main()
+{
+	int t , n1 , n2;
+	t = 1;
+
+	while(t--)
+	{
+		cin>>n1>>n2>>limit_f>>limit_h;
+
+		memset(dp,-1,sizeof(dp));
+
+		int ans = getAns(n1 , n2 , 0 , 0);
+
+		cout<<ans<<endl;
+	}
+}
