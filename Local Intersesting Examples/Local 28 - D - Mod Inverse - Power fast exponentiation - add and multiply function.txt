@@ -38,59 +38,94 @@ const double pi = acos(-1.0);
 
 typedef tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update> ordered_set;
 
-ini N = 2e5 +5;
-pii a[N];
-int n,s;
+ini N = 1e5 +5;
+int fact[N]={};
 
-bool ok(int mid)
+int power(int x, int y)
 {
-    int sum = 0;
-    int cnt = 0;
-    vi v;
-    for(int i = 0;i < n; i++){
-        if(a[i].ss<mid){
-            sum+=a[i].ff;//Do the minimum salary
-        }
-        else if (a[i].ff>=mid){
-            sum+=a[i].ff;//Again do the minimum salary
-            cnt++;
-        }
-        else
-            v.pb(a[i].ff);
+    int res = 1;
+    while (y > 0)
+    {
+        if (y & 1)
+            res = res*x%mod;
+        y = y>>1;
+        x = x*x % mod;
     }
-    int need = max(0ll, (n+1)/2-cnt);
+    return res%mod;
+}
 
-    if(need>v.size()) return false;
+int inv(int n)
+{
+    return power(n,mod-2)%mod;
+}
 
-    for(int i = 0; i<v.size(); i++){
-        if(i<(v.size()-need)) sum+=v[i];
-        else sum+=mid;
+void precompute()
+{
+    fact[1]=1;
+    fact[0]=1;
+    for(int i=2;i<=N;i++){
+        fact[i]=i*fact[i-1];
+        fact[i]%=mod;
     }
-    return sum<=s;
+}
+
+int C(int n, int r)
+{
+    if(n==r || r==0) return 1;
+    if(r>n) return 0;
+    int ans = fact[n];
+    ans = (ans*inv(fact[r]))%mod;
+    ans = (ans*inv(fact[n-r]))%mod;
+    return ans;
 }
 
 void solve()
 {
-    cin>>n>>s;
-    fl(i,0,n) cin>>a[i].ff>>a[i].ss;
-    sort(a,a+n);
-    int l = 1, r = 1e9+5;
-    int mid;
-    int ans=0;
-    while(l<=r){
-        mid = (l+r)>>1ll;
-        if(ok(mid)){
-            l = mid+1;
-            ans=mid;
-        }
-        else r = mid-1;
-    }
-    cout<<ans<<endl;
+   precompute();
+   int n;
+   cin>>n;
+   string s;
+   cin>>s;
+   int m = count(s.begin(),s.end(),'m');
+   int e = count(s.begin(),s.end(),'e');
+   int o = count(s.begin(),s.end(),'o');
+   int w = count(s.begin(),s.end(),'w');
+   int a[e+2]={}, b[o+2]={};
+   for(int i=1;i<=e;i++){
+       a[i]=C(e,i);
+   }
+   for(int i=1;i<=e;i++){
+       a[i]+=a[i-1];
+       a[i]%=mod;
+   }
+   for(int i=1;i<=o;i++){
+       b[i]=C(o,i);
+   }
+   int ans = 0;
+   for(int i=1;i<=o;i++){
+       int bb = b[i];
+       int j;
+       if(e>i){
+           j = a[e]-a[i];
+           j%=mod;
+       }
+       else j=0;
+       bb*=(j);
+       bb%=mod;
+       ans+=bb;
+       ans%=mod;
+   }
+   int ww1,ww2;
+   ww1=(power(2,m)+mod-1)%mod;
+   ww2=(power(2,w)+mod-1)%mod;
+   int ww = (ww1*ww2)%mod;
+   ans = (ww*ans)%mod;
+   cout<<ans<<endl;
 }
 
 int32_t main()
 {
 	omniphantom
-    w(t) solve();
+    solve();
 	return 0;
 }
