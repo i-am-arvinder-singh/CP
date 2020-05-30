@@ -40,33 +40,26 @@ typedef tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_
 
 void solve()
 {
-    string s;
-    cin>>s;
-    int n = s.length();
-    string ss[2];
-    fl(i,0,n){
-        ss[(s[i]-'0')&1]+=s[i];
-    }
-    int i0=0,i1=0;
-    int l0=ss[0].length();
-    int l1=ss[1].length();
-    string ans;
-    while(i0<l0 || i1<l1){
-        if(i0>=l0) ans+=ss[1][i1++];
-        else if(i1>=l1) ans+=ss[0][i0++];
-        else{
-            if(ss[1][i1]<ss[0][i0])
-                ans+=ss[1][i1++];
-            else
-                ans+=ss[0][i0++];
-            }
-        }
-    cout<<ans<<endl;
+   int n;
+   cin>>n;
+   int x = ceil(log2(n+1))-1;
+   vi v;
+   int y=1;
+   fl(i,0,x) v.pb(y),y<<=1ll;
+   x--;
+   int a = (1ll<<(x+1))-1;
+   v.pb(n-a);
+   sort(v.begin(),v.end());
+   vi ans;
+   fl(i,1,v.size()) ans.pb(v[i]-v[i-1]);
+   cout<<ans.size()<<endl;
+   for(auto p:ans) cout<<p<<" ";
+   cout<<endl;
 }
 
 int32_t main()
 {
 	omniphantom
-	w(t) solve();
+    w(t) solve();
 	return 0;
 }
