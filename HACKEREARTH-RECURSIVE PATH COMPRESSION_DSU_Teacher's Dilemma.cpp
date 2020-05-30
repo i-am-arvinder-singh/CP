@@ -30,6 +30,7 @@ using namespace std;
 #define LEFT(n) (2*n)
 #define RIGHT(n) (2*n+1)
 
+//Check below on how to do union operation i.e., in the main function
 ini mx = 2e5;
 int p[mx];
 
@@ -50,7 +51,7 @@ void solve()
     int n,m;
     cin>>n>>m;
     fl(i,1,n+1){
-        p[i]=-1;
+        p[i]=-i;
     }
     fl(i,0,m){
         int a,b;
