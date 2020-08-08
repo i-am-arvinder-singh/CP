@@ -16,14 +16,12 @@ public:
             mid = (l+r)>>1;
             if(f(pref,mid,D,n)) {
                 r=mid-1;
-                ans = mid;
+                ans = mid;//****
             }
             else l=mid+1;
         }
         return ans;
     }
-    
-    //1 2 3 4 
     
     bool f(vector<int> &pref,int mid, int D, int n){
         int j=-1;
@@ -36,8 +34,8 @@ public:
             }
             else if(!f){
                 j=i-1;
-                if(pref[0]>mid) return false;
-                i--;
+                if(pref[0]>mid) return false;//****
+                i--;//****
                 f=true;
                 cnt++;
                 continue;
@@ -48,11 +46,11 @@ public:
             else{
                 cnt++;
                 j=i-1;
-                if(pref[i]-pref[i-1]>mid) return false;
-                i--;
+                if(pref[i]-pref[i-1]>mid) return false;//****
+                i--;//****
             }
         }
-        if(j!=i) cnt++;
+        if(j!=i) cnt++;//****
         return cnt<=D;
     }
 };
