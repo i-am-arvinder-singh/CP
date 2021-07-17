@@ -91,94 +91,142 @@ power of two exactly when x & (x - 1) = 0.
  
 */
 
-vector<int> z_(string &s){
-    int n = s.length();
-    vector<int> z(n);
-    for(int i=0,l=0,r=0;i<n;i++){
+/*
+
+function f(string s)
+    int n = s.length()
+    vector<int> v(n)
+    for(i=1,l=0,r=0;i<n;i++){
         if(i<=r)
-            z[i]=min(r-i+1,z[i-l]);
-        while(i+z[i]<n && s[z[i]]==s[i+z[i]])
-            z[i]++;
+            z[i]=min(r-i+1,z[i-l])
+        while(z[i]+i<n && s[z[i]]==s[z[i]+i])
+            z[i]++
         if(z[i]+i-1>r)
-            l=i,r=z[i]+i-1;
+            l=i, r = z[i]+i-1
     }
-    return z;
-}
+    return v
 
-long long lcm_(long long x, long long y)
-{
-	x%=MOD;
-	y%=MOD;
-    long long ans =  ((long long)(x)*(long long)(y))/(__gcd(x,y));
-    return ans%MOD;
-}
+*/
 
-int mul(int x, int y)
-{
-    x%=MOD;
-    y%=MOD;
-    long long ans = (long long)x * (long long)y;
-    return ans%MOD;
-}
 
-int solve_(vector<string> &A)  {
-    int n = A.size();
-    vector<int> tt;
-    for(int i=0;i<n;i++){
-        string a;
-        for(int j=0;j<A[i].size();j++)
-            a+=A[i][j];
-        int t = a.length();
-        a=a+a;
-        vector<int> z = z_(a);
-        int id = 0;
-        long long cnt = 1;
-        int q = 0;
-        int w = a.length();
-        for(int time=2;time<=w;time++){
-            if(z[(id+cnt)%t]>=t || (id+cnt)%t==0){
-            	q=time-1;
-                break;
-            }
-            cnt+=time;
-        }
-        tt.push_back(q);
+class segTree{
+private:
+    int n;  
+    vector<int> seg; 
+    vector<vector<int>> lazy; 
+    int getMid(int x, int y){
+        return x+(y-x)/2;
     }
-    long long ans = 1;
+    int fun(int x){
+        return (x*(x+1))/2;
+    }
+public: 
+    segTree(int n) : n(n), seg(4*n+1), lazy(4*n+1,{-2,-2,0}) {}
 
-    unordered_map<int,int> my;
-    for(int i=0;i<n;i++){
-        int temp1 = tt[i];
-        debug(tt[i]);
-        unordered_map<int,int> w;
-        for(int j=2;j*j<=tt[i];j++){
-            while((temp1%j)==0){
-                temp1/=j;
-                w[j]++;
+    void propagate(int segId, int segStart, int segEnd)
+    {
+        if(lazy[segId][0]!=-2 and lazy[segId][1]!=-2){
+            int left = lazy[segId][0];
+            int right = lazy[segId][1];
+            int cnt = lazy[segId][2];
+            seg[segId] += cnt*(fun(right)-fun(left));
+            int t = (left+right)/2;
+            lazy[segId] = {-2,-2,0};
+            if(segStart!=segEnd){
+                lazy[LEFT(segId)] = {left,t,cnt};
+                lazy[RIGHT(segId)] = {t,right,cnt};
             }
         }
-        if(temp1>1){
-            w[temp1]++;
-        }
-        for(auto &[key,val]:w){
-            my[key]=max(my[key],val);
-        }
     }
-    for(auto &[x,y]:my){
-        int temp = y;
-        while(temp--){
-            ans=mul(ans,x);
-        }
-    }
-    return ans;
 
-}
+    int init(int segStart, int segEnd, int segId)
+    {
+        if(segStart==segEnd){
+            seg[segId] = 0;
+            return seg[segId]; 
+        }
+        int mid = getMid(segStart,segEnd);
+        seg[segId] = init(segStart,mid,LEFT(segId)) + init(mid+1,segEnd,RIGHT(segId));
+        return seg[segId];
+    }
+
+    void Update(int segStart, int segEnd, int segId, int qStart, int qEnd, int val)
+    {
+        propagate(segId,segStart,segEnd);
+        cout<<"----> "<<segStart<<" "<<segEnd<<" "<<qStart<<" "<<qEnd<<" "<<segId<<endl;
+        if(qEnd < segStart || segEnd < qStart) return;
+        if(qStart <= segStart && segEnd <= qEnd){
+            int dis = segEnd - segStart;
+            int left = segStart - qStart;
+            int right = dis + left + 1;
+            int cnt = 1;
+            debug("########");
+            debug(segStart);
+            debug(segEnd);
+            debug(left);
+            debug(right);
+            debug("########");
+            if(segStart==segEnd){
+                seg[segId] += cnt*(fun(right) - fun(left));
+                return;
+            }
+            seg[segId] += cnt*(fun(right) - fun(left) );
+            int t = (left+right)/2;
+            // int l = lazy[LEFT(segId)][0], r = lazy[LEFT(segId)][1];
+            int c = lazy[LEFT(segId)][2];
+            lazy[LEFT(segId)] = {left,t,c+cnt};
+            // l = lazy[LEFT(segId)][0], r = lazy[RIGHT(segId)][1];
+            c = lazy[RIGHT(segId)][2];
+            lazy[RIGHT(segId)] = {t,right,c+cnt};
+            return;
+        }
+        int mid = getMid(segStart,segEnd);
+        Update(segStart,mid,LEFT(segId),qStart,qEnd,val);
+        Update(mid+1,segEnd,RIGHT(segId),qStart,qEnd,val);
+        seg[segId] = seg[LEFT(segId)] + seg[RIGHT(segId)];
+    }
+
+    int query(int segStart, int segEnd, int segId, int qStart, int qEnd)
+    {
+        propagate(segId,segStart,segEnd);
+        if(qEnd < segStart || segEnd < qStart) return 0;
+        if(qStart <= segStart && segEnd <= qEnd){
+            if(segStart==segEnd) return seg[segId];
+            return seg[segId];
+        }
+        int mid = getMid(segStart,segEnd);
+        return query(segStart,mid,LEFT(segId),qStart,qEnd) + query(mid+1,segEnd,RIGHT(segId),qStart,qEnd);
+    }
+};
 
 
 void solve(int tc) {
-   	vector<string> A =   { "a", "abaabaaba", "aba" };
-   	int ans = solve_(A);
-   	cout<<ans<<endl;
+   	int n_;
+    cin>>n_;
+    int q;
+    cin>>q;
+    int n = 8;
+    int cnt = log2(n_)+1;
+    n = 1<<cnt;
+    debug(n);
+    segTree s(n);
+    s.init(0, n-1, 0);
+    for(int i=0;i<q;i++){
+        int x, y;
+        cin>>x>>y;
+        x--;
+        y--;
+        s.Update(0, n-1, 0, x, y, 0);
+        int val = s.query(0, n-1, 0, x, y);
+
+    }
+    vector<int> ans(n);
+    for(int i=0;i<n_;i++){
+        ans[i] = s.query(0, n-1, 0, i, i);
+    }
+    for(int i=0;i<n_;i++)
+        cout<<ans[i]<<" ";
+    cout<<endl;
 }
 
 
