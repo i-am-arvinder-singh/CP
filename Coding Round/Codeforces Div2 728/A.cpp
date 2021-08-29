@@ -1,4 +1,20 @@
-#include <bits/stdc++.h>
+#include <iostream> 
+#include <sstream> 
+#include <cstdio> 
+#include <cmath> 
+#include <cstring> 
+#include <cctype> 
+#include <string> 
+#include <vector> 
+#include <list> 
+#include <set> 
+#include <map> 
+#include <queue> 
+#include <stack> 
+#include <algorithm> 
+#include <functional> 
+#include <chrono>
+#include <limits.h>
 
 #define fastio() ios_base::sync_with_stdio(false);cin.tie(NULL);cout.tie(NULL)
 #define MOD 1000000007
@@ -89,9 +105,37 @@ power of two exactly when x & (x - 1) = 0.
 */
 
 void solve(int tc){
-	string s = "-100";
-	int val = stoi(s);
-	cout<<val<<endl;
+
+    int n;
+    cin>>n;
+    vector<int> ans;
+    if(n&1){
+        if(n==3){
+            cout<<3<<" "<<1<<" "<<2<<endl;
+        }
+        else{
+            for(int i=1;i<=n-3;i+=2){
+                ans.push_back(i+1);
+                ans.push_back(i);
+            }
+            ans.push_back(n);
+            ans.push_back(n-2);
+            ans.push_back(n-1);
+            for(auto ele:ans)
+                cout<<ele<<" ";
+            cout<<endl;
+        }
+    }
+    else{
+        for(int i=1;i<=n;i+=2){
+            ans.push_back(i+1);
+            ans.push_back(i);
+        }
+        for(auto ele:ans)
+            cout<<ele<<" ";
+        cout<<endl;;
+    }
+
 }
 
 int32_t main() {
@@ -104,7 +148,7 @@ int32_t main() {
 	fastio();
 	auto start1 = std::chrono::high_resolution_clock::now();
 	int tc = 1;
-	// cin>>tc;
+	cin>>tc;
 	for(int i=1;i<=tc;i++){
 		solve(i);
 	}
